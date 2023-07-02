@@ -9,20 +9,35 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 5px;
+    font-size: 25px;
     color: white;
   
   }
   .time-sets{
-    display: grid;
-    grid-template-columns: 38px 280px 50px;
-    justify-content: center;
-    align-items: center;
+ margin: 15px;
+  }
+  #break-info , #session-info{
+    display: flex;
+    flex-direction: row;
+    margin: 10px;
   }
   .dual-container{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    border-radius: 10px;
+    padding: 10px;
+    min-width: 300px;
   }
   .lengths{
-    margin: 5px;
+    display: flex;
+    flex-direction: row;
+  }
+  button{
+ border: none;
+ border-radius: 10px;
+    background-color: black;
+    color: #fff;
   }

@@ -1,134 +1,132 @@
 
-function App (){
-  const [displayTime, setDisplayTime] = React.useState(25 * 60);
-  const [breakTime, setBreakTime] = React.useState(5*60);
-  const [sessionTime, setSessionTime] = React.useState(25 * 60);
-  const [timeOn, setTimeOn] = React.useState(false);
-  const [onBreak, setOnBreak] = React.useState(false);
-  const [breakAudio, setBreakAudio] = React.useState(new Audio("./breakTime.mp3"))
+let interval;
 
-  const playBreakSound = () => {
-    breakAudio.currentTime = 0;
-    breakAudio.play();
+class App extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {
+      minutes : 25,
+      seconds : 0,
+      break : 5,
+      session : 25,
+      playing : false,
+      stopped : true,
+      breaking : false
+    }
   }
-  const formatTime = (time) => {
-    let minutes = Math.floor(time / 60);
-    let seconds = time %  60;
-    return (
-        (minutes < 10 ? "0" + minutes : minutes) + ":" +
-        (seconds < 10 ? "0" + seconds : seconds)
+  
+  play = () => {
+    if(!this.state.playing){
+      this.setState({playing : true, stopped : false});
+      interval = setInterval(() => {this.setState({seconds : this.state.seconds - 1})},1000);
+    }else{
+      this.pause();
+    }   
+  }
+  
+  reset = () => {
+    this.setState({minutes : this.state.session, seconds : 0, stopped : true, session : 25, break : 5, breaking : false});
+    this.pause();
+    let audio = document.getElementById('beep');
+    audio.pause();
+    audio.currentTime = 0;
+  }
+  
+  pause = () => {
+    this.setState({playing : false});
+    clearInterval(interval);
+  }
+  
+  timerDisplay = () => {
+    let minutesDisplay = this.state.minutes.toString();
+    let secondsDisplay = this.state.seconds.toString();
+    if(this.state.minutes <= 9){
+      minutesDisplay = '0' + minutesDisplay;               
+    }
+    
+    if(this.state.seconds <= 9){
+      secondsDisplay = '0' + secondsDisplay;
+    }
+    
+    return minutesDisplay + ':' + secondsDisplay
+  }
+  
+  playBeep = () => {
+    let audio = document.getElementById('beep');
+    audio.currentTime = 0;
+    audio.play();
+  }
+  
+  render(){   
+    if(this.state.seconds < 0 && this.state.minutes > 0){
+      this.setState({seconds : 59, minutes : this.state.minutes - 1});
+    }
+    
+    if(this.state.stopped && this.state.minutes !== this.state.session){
+      this.setState({minutes : this.state.session});
+    }
+    
+    if(this.state.minutes === 0 && this.state.seconds < 0){
+      this.playBeep();
+      if(this.state.breaking){
+        this.setState({minutes : this.state.session, seconds : 0, breaking : false})
+      }else{
+        this.setState({minutes : this.state.break, seconds : 0, breaking : true});
+      }    
+    }
+    
+    return(
+        <div id = 'clock' className="App">
+          <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous"/>
+         <header className="App-header">
+          <div id ='main' className="dual-container">
+            <div id = 'title-container'>
+              <h3 id = 'title'>25 + 5 Clock</h3>
+            </div>
+            <div id = 'break-session-container' className="lengths">
+              <div id = 'break' className="time-sets">
+                <p id = 'break-label'>Break Length</p>
+                <div id = 'break-info'>
+                  <button id = 'break-decrement' onClick = {() => this.setState({break : this.state.break - 1 >= 1 ? this.state.break - 1 : this.state.break})}><i class="fas fa-minus fa-2x" ></i></button>
+                  <p id = 'break-length'>{this.state.break.toString()}</p>
+                  <button id = 'break-increment' onClick = {() => this.setState({break : this.state.break + 1 <= 60 ?  this.state.break + 1 : this.state.break})}><i class="fas fa-plus fa-2x" ></i></button>
+                </div>         
+              </div>
+              <div id = 'session' className="time-sets">
+                <p id = 'session-label'>Session Length</p>
+                <div id = 'session-info'>
+                  <button id = 'session-decrement' onClick = {() => this.setState({session : this.state.session - 1 >= 1 ? this.state.session - 1 : this.state.session})}><i class="fas fa-minus fa-2x"></i></button>
+                  <p id = 'session-length'>{this.state.session.toString()}</p>
+                  <button id = 'session-increment' onClick = {() => this.setState({session : this.state.session + 1 <= 60 ?  this.state.session + 1 : this.state.session})}><i class="fas fa-plus fa-2x"></i></button>
+                </div>
+                
+              </div>
+            </div>
+            <div id = 'timer-container'>
+              <div id = 'timer'>
+                <audio id = 'beep' preload = 'auto' src = "https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"></audio>
+                <p id = 'timer-label'>{this.state.breaking ? 'Break' : 'Session'}</p>
+                <p id = 'time-left'>{
+                    this.state.minutes <= 9 && this.state.seconds <= 9 ?
+                      '0' + this.state.minutes.toString() + ':' +           '0' + this.state.seconds.toString() : 
+                    this.state.minutes <= 9 && this.state.seconds > 9 ? 
+                      '0' + this.state.minutes.toString() + ':' +  
+this.state.seconds.toString() : 
+                    this.state.minutes > 9 && this.state.seconds <= 9 ?
+                      this.state.minutes.toString() + ':' + '0' + this.state.seconds.toString() :                     
+                      this.state.minutes.toString() + ':' + this.state.seconds.toString()
+                     }</p>
+              </div>
+              <div id = 'timer-buttons'>
+                <button id = 'start_stop' onClick = {this.play}>{this.state.playing ? <i className ="fas fa-pause fa-2x"></i> : <i className ="fas fa-play fa-2x"></i>}</button>
+                <button id = 'reset' onClick = {this.reset}><i class="fas fa-redo-alt fa-2x"></i></button>
+              </div>           
+            </div>           
+          </div>
+          </header>
+        </div>
     );
   }
-  const changeTime = (amount, type) => {
-    if (type == "break") {
-        if(breakTime<=60 && amount < 0){
-            return;
-        }
-        setBreakTime((prev) => prev + amount);
-    } else {
-        if(sessionTime<=60 && amount < 0){
-            return;
-        }
-        setSessionTime((prev)=> prev + amount);
-        if(!timeOn){
-            setDisplayTime(sessionTime + amount)
-        }
-    }
-  }
-  const controlTime = () =>{
-    let second = 1000;
-    let date = new Date.getTime();
-    let nextDate = new Date().getTime() + second;
-    let onBreakVariable = onBreak;
-    if (!timeOn) {
-        let interval = setInterval(() => {
-            date = new Date().getTime();
-            if (date > nextDate) {
-                setDisplayTime((prev) => {
-                    if(prev <= 0 && !onBreakVariable){
-                        playBreakSound();
-                        onBreakVariable=true;
-                        setOnBreak(true);
-                        return breakTime;
-                    }else if (prev <= 0 && onBreakVariable) {
-                        playBreakSound();
-                        onBreakVariable=false;
-                        setOnBreak(false);
-                        return sessionTime;
-                    }
-                    return prev - 1;
-                });
-                nextDate += second;
-            }
-        }, 30);
-        localStorage.clear();
-        localStorage.setItem('interval-id', interval)
-    }
-    if(timeOn){
-        clearInterval(localStorage.getItem("interval-id"))
-    }
-    setTimeOn(!timeOn)
-  };
-  const resetTime =() =>{
-    setDisplayTime(25*60);
-    setBreakTime(5*60);
-    setSessionTime(25*60);
-  };
-  return (
-    <div className="App">
-      <header className="App-header" id="my-calculator" >
-        <h2>25+5 Clock</h2>
-        <div className="dual-container">
-            <Length 
-            title={"break length"}
-            changeTime={changeTime}
-            type={"break"}
-            time={breakTime}
-            formatTime={formatTime}
-            />
-            <Length 
-            title={"session length"}
-            changeTime={changeTime}
-            type={"session"}
-            time={sessionTime}
-            formatTime={formatTime}
-            />
-        </div>
-        <h3>{formatTime(displayTime)}</h3>
-        <button className="btn-large deep-purple lighten-2" onClick={controlTime}>
-            {timeOn ? (
-                <i className="material-icons">pause_circle_filled</i>
-            ) : (
-                <i className="material-icons">play_circle_filled</i>
-            )}
-        </button>
-        <button className="btn-large deep-purple lighten-2" onClick={resetTime}>
-            <i className="material-icons">autorenews</i>
-        </button>
-      </header>
-    </div>
-  );
 }
 
-function Length ({title, changeTime, type, time, formatTime}){
-    return (
-        <div className="lengths">
-            <h3>{title}</h3>
-            <div className="time-sets">
-                <button
-                onClick={() => changeTime(-60, type)}
-                className="btn-small deep-purple lighten-2">
-                    <i className="material-icons">arrow_downward</i>
-                </button>
-                <h5>{onBreak ? "break" : "session"}</h5>
-                <h4>{formatTime(time)}</h4>
-                <button
-                 onClick={() => changeTime(60, type)}
-                className="btn-small deep-purple lighten-2">
-                    <i className="material-icons">arrow_upward</i>
-                </button>
-            </div>
-        </div>
-    )
-}
-ReactDOM.render(<App />, document.querySelector('#root'));
+ReactDOM.render(<App/>, document.getElementById('root'));
