@@ -1,5 +1,5 @@
 
-let interval;
+let timeDifference;
 
 class App extends React.Component{
   constructor(props){
@@ -18,7 +18,7 @@ class App extends React.Component{
   play = () => {
     if(!this.state.playing){
       this.setState({playing : true, stopped : false});
-      interval = setInterval(() => {this.setState({seconds : this.state.seconds - 1})},1000);
+      timeDifference = settimeDifference(() => {this.setState({seconds : this.state.seconds - 1})},1000);
     }else{
       this.pause();
     }   
@@ -34,7 +34,7 @@ class App extends React.Component{
   
   pause = () => {
     this.setState({playing : false});
-    clearInterval(interval);
+    cleartimeDifference(timeDifference);
   }
   
   timerDisplay = () => {
